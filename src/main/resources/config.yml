@@ -1,0 +1,19 @@
+discord:
+  token: "MTE1MDQwNDcwNjkzNDQ3Njg0MA.GYICkA.i9UM39ZbPh4rL9rv3tpUzwIYgC4MxDBnJ8Q1AU"
+  guild-id: "1143498396221575289"
+  status:
+    status-message-id: "1150524565387214868" # Set to none if no message exists yet
+    status-message-channel-id: "1150420563861438585"
+  hit-channel-id: "1150420575471272017"
+database:
+  ip: "127.0.0.1"
+  database: "allahfinder"
+  auth:
+    username: "cock"
+    password: "IsnowGriefing"
+    auth-database: "admin"
+scanning:
+  # DEFAULT: OVH + HETZNER
+  ip-range: "87.206.120.17"
+  port-range: "25550-25600"
+  masscan-options: "--rate=100000 --open-only --retries=1 -nmap"
