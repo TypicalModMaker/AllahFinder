@@ -1,8 +1,11 @@
 package dev.isnow.allahfinder.checker.connection;
 
+import com.google.gson.Gson;
+import dev.isnow.allahfinder.checker.protocol.json.data.MCResponse;
 import dev.isnow.allahfinder.checker.protocol.packet.impl.EncryptionPacket;
 import dev.isnow.allahfinder.checker.protocol.packet.impl.HandshakePacket;
 import dev.isnow.allahfinder.checker.protocol.packet.impl.LoginStartPacket;
+import dev.isnow.allahfinder.checker.protocol.packet.impl.MotdHandshakePacket;
 import dev.isnow.allahfinder.util.PacketUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -18,32 +21,57 @@ public class CheckerIntegration {
 
     private Socket socket;
 
-    public String connect(String ip, short port, int protocol, int tries, ArrayList<ConnectAtributes> connectAtributes) throws IOException, InterruptedException {
+    public String connect(String ip, int port, int protocol, int tries, ArrayList<ConnectAtributes> connectAtributes) throws IOException, InterruptedException {
         if(socket != null) {
             socket.close();
             Thread.sleep(500);
         }
+        // SOCKET
         socket = new Socket();
+        socket.setSoTimeout(5000);
         socket.setTcpNoDelay(true);
         socket.connect(new InetSocketAddress(ip, port), 30000);
         in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+        // MOTD HANDSHAKE
+        if(connectAtributes.contains(ConnectAtributes.VERSION)) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            DataOutputStream packetStream = new DataOutputStream(outputStream);
+            MotdHandshakePacket motdHandshakePacket = new MotdHandshakePacket(packetStream, connectAtributes, ip, port);
+            motdHandshakePacket.run();
+            motdHandshakePacket.flush(out, outputStream);
+
+            PacketUtil.readVarInt(this.in);
+            int id = PacketUtil.readVarInt(this.in);
+            int length = PacketUtil.readVarInt(this.in);
+            if (id >= 0 || length > 0) {
+                byte[] array = new byte[length];
+                this.in.readFully(array);
+                String json = new String(array);
+                if (json.contains("{")) {
+                    MCResponse response = new Gson().fromJson(json, MCResponse.class);
+                    protocol = response.getVersion().getProtocol();
+                }
+            }
+        }
+
         // NORMAL HANDSHAKE
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream packetStream = new DataOutputStream(outputStream);
-        HandshakePacket handshakePacket = new HandshakePacket(packetStream, connectAtributes, "AllahFinder", ip, protocol, port);
+        HandshakePacket handshakePacket = new HandshakePacket(packetStream, connectAtributes, "TypicalModMaker", ip, protocol, port);
         handshakePacket.run();
         handshakePacket.flush(out, outputStream);
 
         // LOGIN START
         outputStream = new ByteArrayOutputStream();
         packetStream = new DataOutputStream(outputStream);
-        LoginStartPacket loginStartPacket = new LoginStartPacket(packetStream, connectAtributes, protocol, "AllahFinder");
+        LoginStartPacket loginStartPacket = new LoginStartPacket(packetStream, connectAtributes, protocol, "TypicalModMaker");
         loginStartPacket.run();
         loginStartPacket.flush(out, outputStream);
 
         // ENCRYPTION PACKET
-        if (protocol >= 759 && !connectAtributes.contains(ConnectAtributes.COCKED) && !connectAtributes.contains(ConnectAtributes.BLACK) ) {
+        if (protocol >= 759 && !connectAtributes.contains(ConnectAtributes.BLACK)) {
             outputStream = new ByteArrayOutputStream();
             packetStream = new DataOutputStream(outputStream);
             EncryptionPacket encryptionPacket = new EncryptionPacket(packetStream, connectAtributes);
@@ -56,13 +84,20 @@ public class CheckerIntegration {
         return readServerResponse(ip, port, protocol, tries, connectAtributes);
     }
 
-    private String readServerResponse(String ip, short port, int protocol, int tries, ArrayList<ConnectAtributes> connectAtributes) throws IOException, InterruptedException {
+    public void close() {
+        if(socket != null) {
+            try {
+                socket.close();
+            } catch (IOException ignored) {}
+        }
+    }
+
+    private String readServerResponse(String ip, int port, int protocol, int tries, ArrayList<ConnectAtributes> connectAtributes) throws IOException, InterruptedException {
         try {
             PacketUtil.readVarInt(in);
         } catch (IOException e) {
             if(tries > 5) {
-                e.printStackTrace();
-                return "FAILED - EndOFLine At Reading Server Response - Report to Isnow! IP: " + ip + " Port: " + port;
+                return "FAILED - EndOFLine At Reading Server Response";
             }
             connectAtributes.add(ConnectAtributes.BLACK);
             Thread.sleep(100);
@@ -88,12 +123,11 @@ public class CheckerIntegration {
                     return "FAILED - VPN";
                 case DATA_HOSTNAME:
                 case THROTTLE:
-                    Thread.sleep(5250);
-                    if(tries > 3) {
+                    Thread.sleep(5500);
+                    if(tries > 3 && connectAtributes.contains(ConnectAtributes.THROTTLE)) {
                         return "FAILED - THROTTLE";
                     }
-                    connectAtributes.add(ConnectAtributes.PREMIUM);
-                    return connect(ip, port, protocol, tries, connectAtributes);
+                    return connect(ip, port, protocol, tries, addAtribute(ConnectAtributes.THROTTLE, connectAtributes));
                 case WHITELIST:
                     if(!connectAtributes.contains(ConnectAtributes.PREMIUM)) {
                         return "SUCCESS - Whitelist | (IPForwarding/Cracked)";
@@ -103,23 +137,34 @@ public class CheckerIntegration {
                 case MODDED:
                     return "FAILED - Modded";
                 case VERSION:
-                    return "FAILED - VERSION | Report to Isnow";
+                    if(tries > 2) {
+                        return "FAILED - VERSION | Report to Isnow";
+                    }
+                    return connect(ip, port, protocol, tries, addAtribute(ConnectAtributes.VERSION, connectAtributes));
                 case IP_FORWARDING:
-                    connectAtributes.add(ConnectAtributes.COCKED);
                     Thread.sleep(100);
-                    return connect(ip, port, protocol, tries, removeAtribute(ConnectAtributes.PREMIUM, connectAtributes));
+                    if(tries > 10) {
+                        return "SUCCESS - IPFORWARDING COULDN'T CHECK";
+                    }
+                    return connect(ip, port, protocol, tries, addAtribute(ConnectAtributes.COCKED, connectAtributes));
                 case BYTE_BUF:
                     if(tries == 3) {
                         if(protocol >= 759) {
-                            return "FAILED - <1.19 Premium";
+                            if(connectAtributes.contains(ConnectAtributes.PREMIUM) && connectAtributes.contains(ConnectAtributes.COCKED)) {
+                                return "SUCCESS - >1.19 IPFORWARDING COULDN'T CHECK | ENCRYPTION";
+                            }
+                            return "FAILED - <1.19 Premium | BYTEBUF " + connectAtributes;
                         } else {
                             return "FAILED - Weird Packet Order | Report To Isnow!";
                         }
                     }
                     Thread.sleep(100);
-                    return connect(ip, port, protocol, tries, removeAtribute(ConnectAtributes.PREMIUM, connectAtributes));
+                    return connect(ip, port, protocol, tries, addAtribute(ConnectAtributes.PREMIUM, connectAtributes));
                 case KEY_PACKET:
-                    return "SUCCESS - <1.19 Cracked No IPForwarding";
+                    if(connectAtributes.contains(ConnectAtributes.KEY_PACKET)) {
+                        return "SUCCESS - <1.19 Cracked No IPForwarding";
+                    }
+                    return connect(ip, port, protocol, tries, addAtribute(ConnectAtributes.KEY_PACKET, addAtribute(ConnectAtributes.BLACK, connectAtributes)));
                 case VELOCITY:
                     return "FAILED - Velocity";
                 case UNKNOWN:
@@ -135,9 +180,9 @@ public class CheckerIntegration {
                     if(message.contains("Release candidate")) {
                         return "FAILED - Snapshot";
                     } else if(message.contains("public_key")) {
-                        return "Failed - Online Mode [KEY]";
+                        return "FAILED - Online Mode [KEY]";
                     } else if(message.contains("Outdated server")) {
-                        return "Failed - Report to Isnow";
+                        return "FAILED - Report to Isnow";
                     }
                     return "FAILED - Unknown Message - " + message;
                 }
@@ -159,6 +204,13 @@ public class CheckerIntegration {
 
     private ArrayList<ConnectAtributes> removeAtribute(ConnectAtributes atribute, ArrayList<ConnectAtributes> atributes) {
         atributes.remove(atribute);
+        return atributes;
+    }
+    private ArrayList<ConnectAtributes> addAtribute(ConnectAtributes atribute, ArrayList<ConnectAtributes> atributes) {
+        if(atributes.contains(atribute)) {
+            return atributes;
+        }
+        atributes.add(atribute);
         return atributes;
     }
 }

@@ -1,5 +1,6 @@
 package dev.isnow.allahfinder.checker.protocol.packet.impl;
 
+
 import dev.isnow.allahfinder.checker.connection.ConnectAtributes;
 import dev.isnow.allahfinder.checker.protocol.packet.Packet;
 import dev.isnow.allahfinder.util.PacketUtil;
@@ -21,7 +22,7 @@ public class LoginStartPacket extends Packet {
     public void run() throws IOException {
         PacketUtil.writeByte(outputStream, 0x00);
         PacketUtil.writeString(outputStream, name);
-        if(protocol >= 759 && connectAtributes.contains(ConnectAtributes.PREMIUM)) {
+        if(protocol >= 759 && connectAtributes.contains(ConnectAtributes.PREMIUM) && !connectAtributes.contains(ConnectAtributes.EXTRA_BOOL)) {
             outputStream.writeBoolean(false);
         }
     }

@@ -16,7 +16,7 @@ public enum DisconnectReason {
     MODDED("FML/Forge", "This server has mods that require Forge"),
     VERSION("Incompatible client", "Outdated client!"),
     IP_FORWARDING("IP forwarding"),
-    THROTTLE("Connection throttled!", "You are logging in too fast, try again later."),
+    THROTTLE("Connection throttled!"),
     BYTE_BUF("PooledUnsafeDirectByteBuf"),
     KEY_PACKET("Unexpected key packet"),
     VPN("VPN"),

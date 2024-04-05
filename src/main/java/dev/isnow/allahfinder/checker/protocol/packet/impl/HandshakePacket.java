@@ -13,9 +13,9 @@ public class HandshakePacket extends Packet {
 
     private final String ip;
     private final int protocol;
-    private final short port;
+    private final int port;
 
-    public HandshakePacket(DataOutputStream wrappedStream, ArrayList<ConnectAtributes> connectAtributes, String name, String ip, int protocol, short port) {
+    public HandshakePacket(DataOutputStream wrappedStream, ArrayList<ConnectAtributes> connectAtributes, String name, String ip, int protocol, int port) {
         super("Handshake", wrappedStream, connectAtributes);
         this.ip = ip;
         this.protocol = protocol;
@@ -27,13 +27,13 @@ public class HandshakePacket extends Packet {
         PacketUtil.writeByte(outputStream, 0x00);
         PacketUtil.writeVarInt(outputStream, protocol);
 
-        if(!connectAtributes.contains(ConnectAtributes.PREMIUM) || connectAtributes.contains(ConnectAtributes.COCKED)) {
-            PacketUtil.writeString(outputStream, "\u0000"+ ip + "\u0000cb3e2893-5bcf-3efa-a538-3708ef163e8f");
+        if(!connectAtributes.contains(ConnectAtributes.PREMIUM) || (connectAtributes.contains(ConnectAtributes.PREMIUM) && connectAtributes.contains(ConnectAtributes.COCKED))) {
+            PacketUtil.writeString(outputStream, "\u0000"+ ip + "\u0000cb3e2894-5bcf-3efa-a538-3708ef163e8f");
         } else {
             PacketUtil.writeString(outputStream, ip);
         }
 
-        PacketUtil.writeShort(outputStream, port);
+        PacketUtil.writeShort(outputStream, (short) port);
         PacketUtil.writeVarInt(outputStream, 2);
     }
 }

@@ -2,7 +2,6 @@ package dev.isnow.allahfinder.checker.protocol;
 
 import com.google.gson.Gson;
 import dev.isnow.allahfinder.checker.protocol.json.data.*;
-import dev.isnow.allahfinder.util.MessageUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,10 +33,10 @@ public class MCPing
             if (json.contains("\"text\"")) {
                 return gson.fromJson(json, NewResponse.class).toFinalResponse();
             }
-            return gson.fromJson(json, OldResponse.class).toFinalResponse();
-        } catch (Exception ignored) {
-            MessageUtil.debug("JsonError:", a.host.getHostString(), a.host.getPort());
-        }
+            if(json.contains("\"description\"")) {
+                return gson.fromJson(json, OldResponse.class).toFinalResponse();
+            }
+        } catch (Exception ignored) {}
         return null;
     }
 }

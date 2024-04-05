@@ -1,5 +1,6 @@
 package dev.isnow.allahfinder.checker.protocol.packet;
 
+
 import dev.isnow.allahfinder.checker.connection.ConnectAtributes;
 import dev.isnow.allahfinder.util.PacketUtil;
 import lombok.Data;
