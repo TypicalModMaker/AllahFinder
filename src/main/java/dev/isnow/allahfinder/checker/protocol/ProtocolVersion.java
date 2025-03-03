@@ -44,9 +44,12 @@ public class ProtocolVersion {
     public static final ProtocolVersion v1_19_3 = register(761, "1.19.3");
     public static final ProtocolVersion v1_19_4 = register(762, "1.19.4");
     public static final ProtocolVersion v1_20 = register(763, "1.20/1.20.1");
-
     public static final ProtocolVersion v1_20_2 = register(764, "1.20.2");
-
+    public static final ProtocolVersion v1_20_3 = register(765, "1.20.3/1.20.4");
+    public static final ProtocolVersion v1_20_5 = register(766, "1.20.5/1.20.6");
+    public static final ProtocolVersion v1_21 = register(767, "1.21/1.21.1");
+    public static final ProtocolVersion v1_21_2 = register(768, "1.21.2/1.21.3");
+    public static final ProtocolVersion v1_21_4 = register(769, "1.21.4");
 
     public static final ProtocolVersion unknown = register(-1, "UNKNOWN");
 
@@ -69,11 +72,16 @@ public class ProtocolVersion {
             if(name.equals("1.18")) {
                 return ProtocolVersion.v1_18;
             }
-            if(name.equals("1.15")) {
+            else if(name.equals("1.15")) {
                 return ProtocolVersion.v1_15;
             }
-            if(name.equals("1.16")) {
+            else if(name.equals("1.16")) {
                 return ProtocolVersion.v1_16;
+            }
+            else if(name.equals("1.20")) {
+                return ProtocolVersion.v1_20;
+            } else if(name.equals("1.21")) {
+                return ProtocolVersion.v1_21;
             }
             if (protocolVersion.name.contains(name)) {
                 return protocolVersion;

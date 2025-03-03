@@ -38,7 +38,11 @@ public class Database {
     }
 
     public void addHit(String ip, short port, FinalResponse response, String result) {
-        final List<Player> players = response.getPlayers().getSample();
+        List<Player> players = null;
+        if (response.getPlayers() != null) {
+            players = response.getPlayers().getSample();
+        }
+
         final List<String> playerStringList = new ArrayList<>();
 
         if(players != null) {

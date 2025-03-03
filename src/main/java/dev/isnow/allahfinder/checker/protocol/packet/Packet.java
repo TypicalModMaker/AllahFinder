@@ -1,13 +1,13 @@
 package dev.isnow.allahfinder.checker.protocol.packet;
 
+
 import dev.isnow.allahfinder.checker.connection.ConnectAtributes;
 import dev.isnow.allahfinder.util.PacketUtil;
-import lombok.Data;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import lombok.Data;
 
 @Data
 public abstract class Packet implements IPacket {

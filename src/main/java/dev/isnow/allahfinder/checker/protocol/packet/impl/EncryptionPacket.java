@@ -1,15 +1,14 @@
 package dev.isnow.allahfinder.checker.protocol.packet.impl;
 
+
 import dev.isnow.allahfinder.checker.connection.ConnectAtributes;
 import dev.isnow.allahfinder.checker.protocol.packet.Packet;
 import dev.isnow.allahfinder.util.PacketUtil;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class EncryptionPacket extends Packet {
-
 
     public EncryptionPacket(DataOutputStream dataOutputStream, ArrayList<ConnectAtributes> connectAtributes) {
         super("Encryption", dataOutputStream, connectAtributes);

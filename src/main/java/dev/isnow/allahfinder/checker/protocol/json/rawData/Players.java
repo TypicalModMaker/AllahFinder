@@ -1,7 +1,6 @@
 package dev.isnow.allahfinder.checker.protocol.json.rawData;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 public class Players

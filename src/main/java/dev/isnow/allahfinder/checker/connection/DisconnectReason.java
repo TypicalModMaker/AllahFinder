@@ -1,9 +1,8 @@
 package dev.isnow.allahfinder.checker.connection;
 
 import dev.isnow.allahfinder.util.StringUtil;
-import lombok.Getter;
-
 import java.util.Arrays;
+import lombok.Getter;
 
 public enum DisconnectReason {
     IPWL("You have to join through the proxy", "You must join thru"),
@@ -16,7 +15,7 @@ public enum DisconnectReason {
     MODDED("FML/Forge", "This server has mods that require Forge"),
     VERSION("Incompatible client", "Outdated client!"),
     IP_FORWARDING("IP forwarding"),
-    THROTTLE("Connection throttled!", "You are logging in too fast, try again later."),
+    THROTTLE("Connection throttled!"),
     BYTE_BUF("PooledUnsafeDirectByteBuf"),
     KEY_PACKET("Unexpected key packet"),
     VPN("VPN"),
