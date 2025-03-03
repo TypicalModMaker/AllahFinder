@@ -12,7 +12,7 @@ import lombok.Getter;
 import java.io.File;
 
 @Getter
-public class AllahFinderImpl {
+public class    AllahFinderImpl {
 
     public static boolean DEBUG = System.getenv().containsKey("ALLAHDEBUG");
 
@@ -54,8 +54,12 @@ public class AllahFinderImpl {
         MessageUtil.info("Config loaded!");
 
         MessageUtil.info("Loading database...");
-        final MongoCredential credential = MongoCredential.createCredential(configuration.getUsername(), configuration.getAuthDatabase(), configuration.getPassword().toCharArray());
-        database = new Database(credential, configuration.getIp(), configuration.getServersDatabase());
+        if(configuration.getUsername().equalsIgnoreCase("")) {
+            database = new Database(null, configuration.getIp(), configuration.getServersDatabase());
+        } else {
+            final MongoCredential credential = MongoCredential.createCredential(configuration.getUsername(), configuration.getAuthDatabase(), configuration.getPassword().toCharArray());
+            database = new Database(credential, configuration.getIp(), configuration.getServersDatabase());
+        }
         MessageUtil.info("Database loaded!");
 
         MessageUtil.info("Loading discord bot...");

@@ -27,8 +27,8 @@ public class HandshakePacket extends Packet {
 
         PacketUtil.writeVarInt(outputStream, protocol);
 
-        if(!connectAtributes.contains(ConnectAtributes.PREMIUM) || connectAtributes.contains(ConnectAtributes.COCKED)) {
-            PacketUtil.writeString(outputStream, "\u0000"+ ip + "\u0000cb3e2893-5bcf-3efa-a538-3708ef163e8f");
+        if(!connectAtributes.contains(ConnectAtributes.PREMIUM) || (connectAtributes.contains(ConnectAtributes.PREMIUM) && connectAtributes.contains(ConnectAtributes.COCKED))) {
+            PacketUtil.writeString(outputStream, "\u0000"+ ip + "\u0000cb3e2894-5bcf-3efa-a538-3708ef163e8f");
         } else {
             PacketUtil.writeString(outputStream, ip);
         }

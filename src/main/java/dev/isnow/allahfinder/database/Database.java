@@ -26,8 +26,12 @@ public class Database {
 
     public Database(MongoCredential credentials, String ip, String database) {
         MessageUtil.debug("Connecting to mongodb...");
-        MongoClient server = new MongoClient(new ServerAddress(ip), credentials, MongoClientOptions.builder().build());
-
+        MongoClient server;
+        if(credentials != null) {
+            server = new MongoClient(new ServerAddress(ip), credentials, MongoClientOptions.builder().build());
+        } else {
+            server = new MongoClient(new ServerAddress(ip), MongoClientOptions.builder().build());
+        }
         MessageUtil.debug("Getting database..");
         MongoDatabase db = server.getDatabase(database);
 
